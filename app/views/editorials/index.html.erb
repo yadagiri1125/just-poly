@@ -1,0 +1,41 @@
+<div class="tabbable tabs-left">
+  <ul class="nav nav-tabs">
+    ...
+  </ul>
+  <div class="tab-content">
+    ...
+  </div>
+</div>
+
+<h1>Listing editorials</h1>
+
+<table>
+  <tr>
+    <th>Title</th>
+    <th>Content</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @editorials.each do |editorial| %>
+  <tr>
+    <td><%= editorial.title %></td>
+    <td><%= editorial.content %></td>
+    <td><%= link_to 'Show', editorial %></td>
+    <td><%= link_to 'Edit', edit_editorial_path(editorial) %></td>
+    <td><%= link_to 'Destroy', editorial, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+
+
+      <% if editorial.comments.any? %>
+          <tr><td colspan="5">
+            (<%= pluralize(editorial.comments.count, "comment") %>)
+          </td></tr>
+      <% end %>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Editorial', new_editorial_path %>

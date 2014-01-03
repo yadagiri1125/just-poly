@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Title:</b>
+  <%= @editorial.title %>
+</p>
+
+<p>
+  <b>Content:</b>
+  <%= @editorial.content %>
+</p>
+
+<% if @editorial.comments.any? %>
+    <% @editorial.comments.each do |comment| %>
+        <p>
+          <b>Comment:</b>
+          <%= comment.content %>
+        </p>
+    <% end %>
+<% end %>
+
+
+
+<%= link_to 'Edit', edit_editorial_path(@editorial) %> |
+<%= link_to 'Back', editorials_path %>

@@ -1,0 +1,183 @@
+
+
+http://getbootstrap.com/2.3.2/components.html#buttonDropdowns
+
+
+@p=Post.find(1)
+@p.comments
+
+== Demo of polymorphic associations and nested forms
+
+This is an extremely simple demo of polymorphic associations and nested forms in Rails. It has three models,
+<tt>Post</tt>, <tt>Editorial</tt> and <tt>Comment</tt> - the last one being polymorphic and belonging to both
+<tt>Post</tt> and <tt>Editorial</tt>.
+
+
+== Why?
+
+Polymorphics associations are in some way straightforward, but the two most (deservedly) prominent introductory texts on Rails
+(RoR Tutorial by Michael Hartl and Agile Web Development with Rails by Ruby et al.) do not cover them. The Rails
+Guides are not of much help either. Perform a web search on polymorphic associations and you will largely find
+variations of a Railscast on the topic. The problem is that the cast deals with the case of nested resources only,
+and does not address the issue of updating multiple models with the same form. The approach that I'm using here is
+derived from the fantastic Rails Recipes: Rails 3 Edition book by Chad Fowler.
+
+== The short story
+
+Pull the repository and look at the code :-).
+
+== The long story
+
+Here's what I've done to create the demo app, and why.
+
+First, create the rails app:
+
+  rails new poly_demo
+
+Go into your new poly_demo directory and start the server:
+
+  rails server
+
+Generate two out of the box scaffolds for <tt>Post</tt> and <tt>Editorial</tt> which both have a <tt>title</tt> and <tt>content</tt>
+attribute:
+
+  rails generate scaffold Post title:string content:text
+  rails generate scaffold Editorial title:string content:text
+
+Then, generate the <tt>Comment</tt> model as follows:
+
+  rails generate model Comment content:text commentable_id:integer commentable_type:string
+
+This model has a <tt>content</tt> attribute, which will store the actual comment (note that the fact that this attribute is also
+called content, like the attribute in <tt>Post</tt> and <tt>Editorial</tt>, is purely coincidental and not necessary). The other two attributes,
+<tt>commentable_id</tt> and <tt>commentable_type</tt>, are needed for the polymorphic associations. Because the
+<tt>Comment</tt> model belongs to many models (2 in our case), you can't just store an id for a post, or for an editorial -
+you might have posts and editorials that have the exact same id. In polymorphic associations, the combination of an id and a type
+solves this problem.
+
+Finally, run the migrations:
+
+  bundle exec rake db:migrate
+
+With that, you should now be able to point your app to
+
+  /posts
+
+and
+
+  /editorials
+
+and be able to add posts and editorials. Admittedly, this is ugly looking, but that's not our focus here.
+
+Now, let's implement the polymorphic associations. In models/comment.rb, add
+
+  belongs_to :commentable, polymorphic:true
+
+In models/post.rb, add <tt>:comments</tt> and <tt>:comments_attributes</tt> to the list of <tt>attr_accessible</tt>. Further,
+add the line
+
+  has_many :comments, :as => :commentable, dependent: :destroy
+
+(We'll skip the <tt>Editorial</tt> model for now).
+
+What this does is it associates <tt>Comment</tt> to <tt>Post</tt> through the association <tt>:commentable</tt> (you can
+name the association whatever you want). We also want comments to be deleted when a post is deleted, hence the destroy
+dependence.
+
+You now have a polymorphic association, but how do you CRUD (create read update delete) comments belonging to post?
+
+First, the creation. You want to have a nested form where both the model and the comments can be created (and later edited or deleted)
+at the same time. In order to do that, you need to tell the <tt>Post</tt> model that it should accept nested attributes for
+the comments. To do this, add the following to models/post.rb:
+
+  accepts_nested_attributes_for :comments,
+                                  reject_if:lambda { |attrs|
+                                    attrs.all? { |key, value| value.blank? }
+                                  },
+                                  allow_destroy:true
+
+The <tt>accepts_nested_attributes_for</tt> allows the nesting of attributes - the rest of the code serves two other equally important functions. The first
+part ensures that we are not storing blank comments; the second part ensures that we can delete comments.
+
+Now, let's update the form. In views/posts/_form.html.erb, you have a line
+
+  <%= form_for(@post) do |f| %>
+
+Change this to
+
+  <%= form_for(@post.with_blank_comment) do |f| %>
+
+This will call a method (which will have to generate below) that will make sure that a comment is built - otherwise the form
+element for a new comment will not be shown.
+
+In the same file, right before the submit button, add
+
+  <%= f.fields_for(:comments) do |comments_form| %>
+        <div class="field">
+        <%=  comments_form.label 'Comment:' %>
+        <%=  comments_form.text_field :content %>
+        <%=  unless comments_form.object.new_record?
+               comments_form.check_box('_destroy') + comments_form.label('_destroy','Remove')
+             end %>
+        </div>
+    <% end %>
+
+This renders the form elements for the comments, and further ensures that there is a checkbox to delete already existing comments.
+
+Now, let's not forget to create the <tt>with_blank_comment</tt> method. In models/post.rb, add
+
+  def with_blank_comment
+    comments.build
+    self
+  end
+
+With what we have so far, we should be able to create (and update / delete) comments. Go ahead and try it out - you won't see the comments,
+because we haven't implemented the show and index views yet, but you can verify that the comments are created, updated and
+deleted through the console:
+
+  rails console
+  >> Comment.all
+
+Notice that each comment has an <tt>id</tt> attribute (its unique identifier) as well as a <tt>commentable_id</tt> and
+<tt>commentable_type</tt> attribute. The <tt>commentable_id</tt> is the id of the corresponding <tt>Post</tt>, and the
+<tt>commentable_type</tt> should be Post.
+
+In order to show the comments, we need to modify two more files. First, in views/posts/show.html.erb, add
+
+  <% if @post.comments.any? %>
+    <% @post.comments.each do |comment| %>
+      <p>
+        <b>Comment:</b>
+        <%= comment.content %>
+      </p>
+    <% end %>
+  <% end %>
+
+right after the post title and content. Finally, in views/posts/index.html.erb, add
+
+  <% if post.comments.any? %>
+    <tr><td colspan="5">
+      (<%= pluralize(post.comments.count, "comment") %>)
+    </td></tr>
+  <% end %>
+
+after the last <tt></tr></tt> tag.
+
+Almost there - the point of a polymorphic association, of course, is that you want multiple models to be commentable, so
+just implement the corresponding changes for the <tt>Editorial</tt> model, i.e.
+
+1. Update models/editorial.rb
+2. Update views/editorials/_form.html.erb (don't forget <tt>with_blank_comment</tt> in form!)
+3. Update views/editorials/index.html.erb (make sure you change post to editorial)
+4. Update views/editorials/show.html.erb (make sure you change post to editorial)
+
+That's it - you can now add comments to both posts and editorials. This is a proper polymorphic association with a
+nested form, without a nested resource.
+
+An even better version would add some jQuery sauce to the form, allowing the user to add as many comments in one go as
+she wants.
+
+
+
+
+
