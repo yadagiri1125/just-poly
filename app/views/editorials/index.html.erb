@@ -8,9 +8,8 @@
 </div>
 
 <h1>Listing editorials</h1>
-<%= @editorials.inspect %>
-<%= @editorials.to_yaml %>
-
+<%#= @editorials.inspect %>
+<%#= @editorials.to_yaml %>
 
 <table>
   <tr>
@@ -42,3 +41,35 @@
 <br />
 
 <%= link_to 'New Editorial', new_editorial_path %>
+<%#= will_paginate @editorials %>
+<hr>
+<h2>digg_pagination</h2>
+<div class="digg_pagination">
+  <div class="page_info">
+    <%= page_entries_info @posts %>
+  </div>
+  <%= will_paginate @posts, :container => false %>
+</div>
+
+
+<h2>apple_pagination</h2>
+<hr>
+
+<div class="apple_pagination">
+  <div class="page_info">
+    <%= page_entries_info @posts %>
+  </div>
+  <%= will_paginate @posts, :container => false %>
+</div>
+<h2>flickr_pagination</h2>
+<hr>
+
+<div class="flickr_pagination">
+  <div class="page_info">
+    <%= page_entries_info @posts %>
+  </div>
+  <%= will_paginate @posts, :container => false %>
+</div>
+
+
+
