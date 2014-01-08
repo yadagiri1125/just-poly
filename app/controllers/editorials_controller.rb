@@ -28,6 +28,7 @@ class EditorialsController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @editorial }
+      format.vcard { render :text => 'hi this my custom mime type' }
     end
   end
 
