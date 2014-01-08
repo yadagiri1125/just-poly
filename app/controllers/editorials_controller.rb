@@ -2,7 +2,17 @@ class EditorialsController < ApplicationController
   # GET /editorials
   # GET /editorials.json
   def index
-    @editorials = Editorial.all
+
+     @editorials = Editorial.all
+binding.pry
+
+    #@editorials.inspect
+    #@editorials.to_yaml
+
+    #logger.debug "New post: #{@editorials.inspect}"
+    #logger.debug "New post: #{@editorials.to_yaml}"
+    logger.info "Processing the request..."
+    logger.fatal "Terminating application, raised unrecoverable error!!!"
 
     respond_to do |format|
       format.html # index.html.erb
@@ -25,7 +35,7 @@ class EditorialsController < ApplicationController
   # GET /editorials/new.json
   def new
     @editorial = Editorial.new
-
+    binding.pry
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: @editorial }
@@ -41,6 +51,7 @@ class EditorialsController < ApplicationController
   # POST /editorials.json
   def create
     @editorial = Editorial.new(params[:editorial])
+    binding.pry
 
     respond_to do |format|
       if @editorial.save
