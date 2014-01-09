@@ -1,9 +1,17 @@
 PolyDemo::Application.routes.draw do
+  #resources :tasks
+
+
   resources :editorials
 
 
   resources :posts
 
+  resources :tasks do
+    collection do
+      put 'complete'
+    end
+  end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
