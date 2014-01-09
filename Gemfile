@@ -17,7 +17,8 @@ gem 'pry-stack_explorer'
 gem 'pry-debugger'
 gem 'debugger'
 gem 'will_paginate'
-
+gem 'populator'
+gem 'faker'
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
