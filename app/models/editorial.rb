@@ -18,4 +18,5 @@ class Editorial < ActiveRecord::Base
              :order => 'name'
   end
 
+
 end
