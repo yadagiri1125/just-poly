@@ -6,6 +6,10 @@ class Editorial < ActiveRecord::Base
                                   attrs.all? { |key, value| value.blank? }
                                 },
                                 allow_destroy:true
+  scope :list1, where(:id => 1..5)
+  scope :list2, where(:id => 6..10)
+  scope :list3, where(:id => 11..15)
+  default_scope where(:id => 1..5)
 
   def with_blank_comment
     comments.build
