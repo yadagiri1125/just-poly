@@ -158,7 +158,7 @@
     <orderEntry type="library" scope="PROVIDED" name="treetop (v1.4.15, RVM: ruby-1.9.3-p484 [rails-bootstrap]) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="tzinfo (v0.3.38, RVM: ruby-1.9.3-p484 [rails-bootstrap]) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="uglifier (v2.4.0, RVM: ruby-1.9.3-p484 [rails-bootstrap]) [gem]" level="application" />
-    <orderEntry type="module" module-name="126-populating-a-database" />
+    <orderEntry type="module" module-name="218-making-generators-in-rails-3" />
   </component>
   <component name="RModuleSettingsStorage">
     <LOAD_PATH number="0" />
